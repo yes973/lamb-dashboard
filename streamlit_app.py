@@ -167,7 +167,7 @@ def render_simple_page(page_title: str):
     tab1, tab2 = st.tabs(["탭 1", "탭 2"])
     with tab1:
         st.header(f'{page_title} - 탭 1', divider='gray')
-        st.write(f'{page_title}의 간단한 텍스트입니다.')
+        st.write(f'{page_title}의 간단한 텍스트입니다. 이 수정사항은 적용되었을까요?')
     with tab2:
         st.header(f'{page_title} - 탭 2', divider='gray')
         st.write(f'{page_title}의 간단한 텍스트입니다.')
