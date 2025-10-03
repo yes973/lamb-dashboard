@@ -60,99 +60,123 @@ def get_gdp_data():
 gdp_df = get_gdp_data()
 
 # -----------------------------------------------------------------------------
-# Draw the actual page
+# Sidebar navigation for multi-page layout
+with st.sidebar:
+    st.header('페이지 선택')
+    selected_page = st.radio('', ['홈', '페이지 1', '페이지 2'], index=0)
 
-dashboard_tab, info_tab = st.tabs(["대시보드", "정보"])
 
-with dashboard_tab:
-    # Set the title that appears at the top of the page.
-    '''
-    # :earth_americas: GDP dashboard
+def render_home_page():
+    """Render the existing GDP dashboard page with its original tabs."""
+    dashboard_tab, info_tab = st.tabs(["대시보드", "정보"])
 
-    Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-    notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-    But it's otherwise a great (and did I mention _free_?) source of data.
-    '''
+    with dashboard_tab:
+        '''
+        # :earth_americas: GDP dashboard
 
-    # Add some spacing
-    ''
-    ''
+        Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
+        notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
+        But it's otherwise a great (and did I mention _free_?) source of data.
+        '''
 
-    min_value = gdp_df['Year'].min()
-    max_value = gdp_df['Year'].max()
+        ''
+        ''
 
-    from_year, to_year = st.slider(
-        'Which years are you interested in?',
-        min_value=min_value,
-        max_value=max_value,
-        value=[min_value, max_value])
+        min_value = gdp_df['Year'].min()
+        max_value = gdp_df['Year'].max()
 
-    countries = gdp_df['Country Code'].unique()
+        from_year, to_year = st.slider(
+            'Which years are you interested in?',
+            min_value=min_value,
+            max_value=max_value,
+            value=[min_value, max_value])
 
-    if not len(countries):
-        st.warning("Select at least one country")
+        countries = gdp_df['Country Code'].unique()
 
-    selected_countries = st.multiselect(
-        'Which countries would you like to view?',
-        countries,
-        ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
+        if not len(countries):
+            st.warning("Select at least one country")
 
-    ''
-    ''
-    ''
+        selected_countries = st.multiselect(
+            'Which countries would you like to view?',
+            countries,
+            ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
 
-    # Filter the data
-    filtered_gdp_df = gdp_df[
-        (gdp_df['Country Code'].isin(selected_countries))
-        & (gdp_df['Year'] <= to_year)
-        & (from_year <= gdp_df['Year'])
-    ]
+        ''
+        ''
+        ''
 
-    st.header('GDP over time', divider='gray')
+        # Filter the data
+        filtered_gdp_df = gdp_df[
+            (gdp_df['Country Code'].isin(selected_countries))
+            & (gdp_df['Year'] <= to_year)
+            & (from_year <= gdp_df['Year'])
+        ]
 
-    ''
+        st.header('GDP over time', divider='gray')
 
-    st.line_chart(
-        filtered_gdp_df,
-        x='Year',
-        y='GDP',
-        color='Country Code',
-    )
+        ''
 
-    ''
-    ''
-    ''
+        st.line_chart(
+            filtered_gdp_df,
+            x='Year',
+            y='GDP',
+            color='Country Code',
+        )
 
-    first_year = gdp_df[gdp_df['Year'] == from_year]
-    last_year = gdp_df[gdp_df['Year'] == to_year]
+        ''
+        ''
+        ''
 
-    st.header(f'GDP in {to_year}', divider='gray')
+        first_year = gdp_df[gdp_df['Year'] == from_year]
+        last_year = gdp_df[gdp_df['Year'] == to_year]
 
-    ''
+        st.header(f'GDP in {to_year}', divider='gray')
 
-    cols = st.columns(4)
+        ''
 
-    for i, country in enumerate(selected_countries):
-        col = cols[i % len(cols)]
+        cols = st.columns(4)
 
-        with col:
-            first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-            last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
+        for i, country in enumerate(selected_countries):
+            col = cols[i % len(cols)]
 
-            if math.isnan(first_gdp):
-                growth = 'n/a'
-                delta_color = 'off'
-            else:
-                growth = f'{last_gdp / first_gdp:,.2f}x'
-                delta_color = 'normal'
+            with col:
+                first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
+                last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
 
-            st.metric(
-                label=f'{country} GDP',
-                value=f'{last_gdp:,.0f}B',
-                delta=growth,
-                delta_color=delta_color
-            )
+                if math.isnan(first_gdp):
+                    growth = 'n/a'
+                    delta_color = 'off'
+                else:
+                    growth = f'{last_gdp / first_gdp:,.2f}x'
+                    delta_color = 'normal'
 
-with info_tab:
-    st.header('정보', divider='gray')
-    st.write('이 탭에는 간단한 텍스트가 표시됩니다.')
+                st.metric(
+                    label=f'{country} GDP',
+                    value=f'{last_gdp:,.0f}B',
+                    delta=growth,
+                    delta_color=delta_color
+                )
+
+    with info_tab:
+        st.header('정보', divider='gray')
+        st.write('이 탭에는 간단한 텍스트가 표시됩니다.')
+
+
+def render_simple_page(page_title: str):
+    """Render a simple page layout with top tabs and placeholder text."""
+    tab1, tab2 = st.tabs(["탭 1", "탭 2"])
+    with tab1:
+        st.header(f'{page_title} - 탭 1', divider='gray')
+        st.write(f'{page_title}의 간단한 텍스트입니다.')
+    with tab2:
+        st.header(f'{page_title} - 탭 2', divider='gray')
+        st.write(f'{page_title}의 간단한 텍스트입니다.')
+
+
+# Route to the selected page
+if selected_page == '홈':
+    render_home_page()
+elif selected_page == '페이지 1':
+    render_simple_page('페이지 1')
+elif selected_page == '페이지 2':
+    render_simple_page('페이지 2')
