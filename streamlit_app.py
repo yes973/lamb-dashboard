@@ -20,7 +20,7 @@ def init_firebase():
         json_str = st.secrets["firebase"]["key_json"]
         
         # 2. 문자열을 파이썬 딕셔너리로 변환 (이 부분이 유지됨)
-        key_dict = json.loads(json_str)
+        key_dict = json.loads(json_str, strict=False)
         
         cred = credentials.Certificate(key_dict)
         firebase_admin.initialize_app(cred)
