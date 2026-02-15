@@ -15,16 +15,14 @@ st.set_page_config(page_title="동물병원 경영 벤치마크", layout="wide")
 # 로컬에서 테스트할 때는 json 파일을 직접 로드합니다.
 @st.cache_resource
 def init_firebase():
-    # 이미 앱이 초기화되었는지 확인 (중복 초기화 방지)
     if not firebase_admin._apps:
-        # 실전 배포시: st.secrets에서 정보 로드
-        if 'firebase_key' in st.secrets:
-            key_dict = json.loads(st.secrets['firebase_key'])
-            cred = credentials.Certificate(key_dict)
-        # 로컬 테스트시: 다운받은 json 파일 경로 입력
-        else:
-            cred = credentials.Certificate("serviceAccountKey.json_경로를_여기에_입력하세요")
+        # 1. Secrets에서 문자열로 가져옴
+        json_str = st.secrets["firebase"]["key_json"]
         
+        # 2. 문자열을 파이썬 딕셔너리로 변환 (이 부분이 유지됨)
+        key_dict = json.loads(json_str)
+        
+        cred = credentials.Certificate(key_dict)
         firebase_admin.initialize_app(cred)
     
     return firestore.client()
